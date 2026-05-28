@@ -1,0 +1,56 @@
+{
+  "description": "跨模型路由配置 — 根据任务类型自动分配最优模型",
+  "backends": {
+    "default": {
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "baseUrl": "https://api.deepseek.com/anthropic"
+    },
+    "reasoning": {
+      "provider": "deepseek",
+      "model": "deepseek-reasoner",
+      "baseUrl": "https://api.deepseek.com/anthropic"
+    }
+  },
+  "routes": {
+    "coding": {
+      "target": "default",
+      "description": "代码生成和日常开发任务"
+    },
+    "code_review": {
+      "target": "default",
+      "description": "代码审查任务，需要深度分析"
+    },
+    "reasoning": {
+      "target": "reasoning",
+      "description": "复杂推理、数学、逻辑分析"
+    },
+    "architecture": {
+      "target": "reasoning",
+      "description": "架构设计和技术方案评审"
+    },
+    "debugging": {
+      "target": "reasoning",
+      "description": "复杂Bug根因分析"
+    },
+    "documentation": {
+      "target": "default",
+      "description": "文档生成和更新"
+    },
+    "testing": {
+      "target": "default",
+      "description": "测试用例编写"
+    },
+    "security_audit": {
+      "target": "reasoning",
+      "description": "安全审计需要深度推理"
+    }
+  },
+  "agent_routing": {
+    "builder": "default",
+    "reviewer": "default",
+    "tester": "default",
+    "documentor": "default",
+    "security": "reasoning"
+  }
+}
