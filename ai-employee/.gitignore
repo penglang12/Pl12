@@ -1,0 +1,42 @@
+# AI Employee - 忽略敏感数据和运行时文件
+
+# 数据目录
+data/
+!data/.gitkeep
+
+# 数据库文件
+*.db
+*.sqlite3
+
+# 浏览器配置文件
+browser-profiles/
+**/browser-profiles/
+
+# Cookie / 账号凭证
+accounts/
+**/accounts/
+
+# 日志
+logs/
+*.log
+
+# 截图
+screenshots/
+
+# 环境变量
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

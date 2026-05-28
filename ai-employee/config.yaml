@@ -1,0 +1,87 @@
+# AI Employee - 全局配置文件
+# 炼刀 AI 复刻项目
+
+# ==================== 通用设置 ====================
+app:
+  name: "AI Employee"
+  version: "0.1.0"
+  debug: true
+  env: "development"  # development | production
+  data_dir: "./data"
+
+# ==================== Ai头号玩家 API ====================
+ai_touhaowanjia:
+  # 从环境变量读取，不在配置文件中硬编码
+  api_key_env: "AI_TOUHAOWANJIA_API_KEY"
+  base_url: "https://api.lk888.ai/api"
+  timeout: 60
+  max_retries: 3
+
+# ==================== 模型路由 ====================
+models:
+  chat:
+    provider: "ai_touhaowanjia"
+    model_id: "deepseek-chat"
+    max_tokens: 4096
+    temperature: 0.7
+  reasoning:
+    provider: "ai_touhaowanjia"
+    model_id: "deepseek-reasoner"
+    max_tokens: 8192
+  vision:
+    provider: "ai_touhaowanjia"
+    model_id: "deepseek-chat"
+    max_tokens: 4096
+
+# ==================== 数据库 ====================
+database:
+  type: "sqlite"  # sqlite | postgresql
+  sqlite_path: "./data/ai_employee.db"
+  pool_size: 5
+  echo_sql: false
+
+# ==================== 任务调度 ====================
+scheduler:
+  storage_type: "sqlite"  # sqlite | redis
+  sqlite_path: "./data/scheduler.db"
+  max_instances: 3
+  coalesce: true
+
+# ==================== 浏览器自动化 (Playwright) ====================
+browser:
+  headless: false  # 调试时设为 false
+  viewport:
+    width: 1280
+    height: 720
+  timeout: 30000
+  user_data_dir: "./data/browser-profiles"
+  launch_args:
+    - "--disable-blink-features=AutomationControlled"
+
+# ==================== 微信视频号 ====================
+wechat_video:
+  account_file: "./data/accounts/wechat.json"
+  login_wait_seconds: 120
+  max_daily_publish: 5
+  publish_interval_minutes: 30
+  comment_reply_enabled: true
+
+# ==================== 内容策略 ====================
+content_strategy:
+  max_drafts_per_day: 10
+  min_words: 200
+  max_words: 2000
+  supported_formats:
+    - "短视频脚本"
+    - "图文笔记"
+    - "直播话术"
+  review_required: true
+  auto_publish: false
+
+# ==================== 日志 ====================
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d | %(message)s"
+  file: "./data/logs/ai-employee.log"
+  max_size_mb: 50
+  backup_count: 7

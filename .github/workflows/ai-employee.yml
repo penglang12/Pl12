@@ -1,0 +1,55 @@
+name: AI Employee 定时任务
+
+on:
+  schedule:
+    # 北京时间 8:00 = UTC 0:00 — 生成今日内容计划
+    - cron: '0 0 * * *'
+    # 北京时间 10:00-22:00 每 2 小时 — 检查发布状态
+    - cron: '0 2,4,6,8,10,12,14 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: '要执行的任务'
+        required: true
+        default: 'content_plan'
+        type: choice
+        options:
+          - content_plan
+          - collect_performance
+
+jobs:
+  run-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        working-directory: ./ai-employee
+        run: |
+          pip install pyyaml pydantic loguru httpx apscheduler
+
+      - name: 执行内容计划生成
+        if: ${{ github.event_name == 'schedule' && github.event.schedule == '0 0 * * *' || (github.event_name == 'workflow_dispatch' && inputs.task == 'content_plan') }}
+        working-directory: ./ai-employee
+        env:
+          AI_TOUHAOWANJIA_API_KEY: ${{ secrets.AI_TOUHAOWANJIA_API_KEY }}
+        run: python workflows/content_plan.py
+
+      - name: 执行数据采集
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.task == 'collect_performance' }}
+        working-directory: ./ai-employee
+        env:
+          AI_TOUHAOWANJIA_API_KEY: ${{ secrets.AI_TOUHAOWANJIA_API_KEY }}
+        run: python workflows/collect_performance.py
+
+      - name: 执行周期性任务
+        if: ${{ github.event_name == 'schedule' && github.event.schedule != '0 0 * * *' }}
+        working-directory: ./ai-employee
+        env:
+          AI_TOUHAOWANJIA_API_KEY: ${{ secrets.AI_TOUHAOWANJIA_API_KEY }}
+        run: python workflows/collect_performance.py
