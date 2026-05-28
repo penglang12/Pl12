@@ -1,0 +1,217 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-85c0186f059e4946a5d32149541566ab",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "ANTHROPIC_MODEL": "deepseek-chat",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-reasoner",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-chat",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-chat",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-chat",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Glob",
+      "Grep",
+      "Read",
+      "Edit",
+      "Write",
+      "Bash",
+      "Powershell"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Powershell|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\PC\\WorkBuddy\\Claw\\.claude\\hooks\\pre-tool-guard.ps1\" -ToolName ${TOOL_NAME} -Input ${INPUT}",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if grep -rE '(password|secret|token|api_key|access_key).*=.*[\"\\'']?[a-zA-Z0-9_-]{20,}' . --exclude-dir=.git --include='*.{ts,js,py,go,yaml,yml,json}' 2>/dev/null; then echo '[HOOK] WARNING: Possible credential detected in file to be written. ABORTING.'; exit 1; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\PC\\WorkBuddy\\Claw\\.claude\\hooks\\post-tool-log.ps1\" -ToolName ${TOOL_NAME} -Output ${OUTPUT}",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/HRSoftstore/Install/Clawlongxiabendibushuchushou/JHMoltbotIns/claws/nodejs/nodejs/bun run C:/Users/PC/.claude-memory-hub/dist/hooks/post-tool-use.js"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo [Claw] 项目灵魂已加载。五阶段体系就绪。",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/HRSoftstore/Install/Clawlongxiabendibushuchushou/JHMoltbotIns/claws/nodejs/nodejs/bun run C:/Users/PC/.claude-memory-hub/dist/hooks/user-prompt-submit.js"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/HRSoftstore/Install/Clawlongxiabendibushuchushou/JHMoltbotIns/claws/nodejs/nodejs/bun run C:/Users/PC/.claude-memory-hub/dist/hooks/pre-compact.js"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/HRSoftstore/Install/Clawlongxiabendibushuchushou/JHMoltbotIns/claws/nodejs/nodejs/bun run C:/Users/PC/.claude-memory-hub/dist/hooks/post-compact.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/HRSoftstore/Install/Clawlongxiabendibushuchushou/JHMoltbotIns/claws/nodejs/nodejs/bun run C:/Users/PC/.claude-memory-hub/dist/hooks/session-end.js"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "superpowers-zh@superpowers-zh": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-modernization@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "session-report@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "superpowers-zh": {
+      "source": {
+        "source": "github",
+        "repo": "jnMetaCode/superpowers-zh"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": false,
+  "theme": "auto",
+  "mcpServers": {
+    "claude-memory-hub": {
+      "command": "C:/HRSoftstore/Install/Clawlongxiabendibushuchushou/JHMoltbotIns/claws/nodejs/nodejs/bun",
+      "args": [
+        "run",
+        "C:/Users/PC/.claude-memory-hub/dist/index.js"
+      ]
+    },
+    "github": {
+      "command": "node",
+      "args": ["C:/n8ng2/node_modules/@modelcontextprotocol/server-github/dist/index.js"],
+      "description": "GitHub MCP 服务（gh CLI + @modelcontextprotocol/server-github）",
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  },
+  "commands": {
+    "plan": {
+      "description": "将需求拆解为可执行的原子化任务计划",
+      "command": "分析当前需求，拆解为2-5分钟可完成的原子化任务，使用TaskCreate创建每个任务，标注依赖关系，并按顺序执行。每个任务必须包含：修改的文件、具体逻辑、边界情况。"
+    },
+    "debug": {
+      "description": "结构化系统调试流程",
+      "command": "遵循系统化调试流程：1) 收集错误信息/日志 2) 分析根因 3) 推导复现步骤 4) 验证复现 5) 实施修复 6) 输出复盘报告。复盘报告保存到 memory/ 目录。"
+    },
+    "review-deep": {
+      "description": "多维度并行代码审查",
+      "command": "并行启动3个审查Agent：Agent1审查逻辑正确性，Agent2审查安全漏洞，Agent3审查性能问题。汇总结果后输出综合审查报告。审查通过后用 touch .git/REVIEW_DONE 创建审查标记（预提交hook会读取此标记确认审查已完成）。"
+    },
+    "create-release": {
+      "description": "自动生成并发布新版本",
+      "command": "1) 检查未合并PR（若 gh CLI 未安装则提示运行 scripts/setup-gh-cli.ps1） 2) 从commit历史生成CHANGELOG 3) 创建git tag 4) 运行 gh release create（用 scripts/gh-wrapper.sh 代替直接调用 gh） 5) 输出发布摘要。如果没有未合并的PR，提示用户确认是否仍要发布。"
+    },
+    "deploy-release": {
+      "description": "部署指定版本到生产环境",
+      "command": "1) 获取指定release的tag 2) 触发GitHub Actions的 deploy.yml workflow（云端运行，本机关机不受影响） 3) 监控部署状态 4) 如果部署失败提示手动回滚（scripts/rollback.sh 支持 git/db/iac/all 四层回滚）。需要用户指定版本号。"
+    },
+    "scaffold-saas": {
+      "description": "一键生成SaaS项目骨架",
+      "command": "在当前目录创建完整的SaaS项目骨架，包含：1) Next.js 14 App Router 2) 用户认证(邮箱+OAuth) 3) Stripe支付集成 4) Prisma ORM + SQLite/PostgreSQL 5) Docker Compose配置 6) GitHub Actions CI。生成后输出项目结构和启动说明。"
+    },
+    "scan-secrets": {
+      "description": "扫描代码中的敏感信息",
+      "command": "递归扫描当前工作目录中的代码文件，检测可能包含的：API密钥、密码、Token、证书私钥、数据库连接字符串、AWS/GCP/Azure凭证。输出风险文件列表和行号。"
+    },
+    "triage-issues": {
+      "description": "自动分类GitHub Issue",
+      "command": "1) 通过 gh CLI（用 scripts/gh-wrapper.sh）获取未标记的Issue列表 2) 分析每个Issue的内容 3) 自动打标签(类型/优先级/领域) 4) 根据标签分配责任人 5) 生成分类摘要。如果 gh 未安装，提示运行 scripts/setup-gh-cli.ps1。"
+    },
+    "db-migrate": {
+      "description": "安全执行数据库迁移",
+      "command": "1) 审查迁移文件的SQL安全性 2) 确认存在数据库备份 3) 在事务中执行迁移 4) 验证迁移结果 5) 如失败自动回滚。需要先确认数据库连接已配置。"
+    },
+    "nightly-fix": {
+      "description": "自动诊断并修复Bug（云端模式）",
+      "command": "1) 检查最近的Issue和Bug列表 2) 按优先级排序 3) 对每个Bug：分析根因 → 实现修复 → 运行测试 → 创建PR草稿 4) 输出修复汇总报告。修改记录自动写入memory/。提示用户可配置 .github/workflows/scheduled-maintenance.yml 实现云端定时自动执行。"
+    }
+  }
+}
