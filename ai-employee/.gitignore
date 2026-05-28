@@ -40,3 +40,14 @@ venv/
 .vscode/
 *.swp
 *.swo
+
+# Build artifacts
+.eggs/
+dist/
+build/
+
+# 允许跟踪 data 子目录的占位文件
+!data/accounts/.gitkeep
+!data/browser-profiles/.gitkeep
+!data/screenshots/.gitkeep
+!data/logs/.gitkeep
