@@ -1,0 +1,62 @@
+name: 云端定时维护
+
+on:
+  schedule:
+    # 北京时间每天 8:00 (UTC 0:00)
+    - cron: '0 0 * * *'
+    # 北京时间每天 20:00 (UTC 12:00)
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: '要执行的任务'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - security-scan
+          - dependency-audit
+          - stale-issue-cleanup
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 依赖安全审计
+        run: |
+          if [ -f package.json ]; then
+            npm audit --audit-level=high || true
+          fi
+          if [ -f requirements.txt ]; then
+            pip install safety && safety check || true
+          fi
+      - name: 扫描密钥泄露
+        uses: zricethezav/gitleaks-action@v2
+        continue-on-error: true
+
+  dependency-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 检查过时依赖
+        run: |
+          if [ -f package.json ]; then
+            npm outdated || true
+          fi
+
+  issue-cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: '此 Issue 已超过 30 天未活动，将被自动关闭。'
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: 'stale'
