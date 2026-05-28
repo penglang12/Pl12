@@ -1,0 +1,60 @@
+name: 分支保护
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, master, develop]
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查分支命名规范
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "分支: $HEAD_REF"
+
+          # 允许的分支前缀
+          ALLOWED="claude/ feature/ fix/ hotfix/ chore/ dependabot/ release/"
+
+          valid=false
+          for prefix in $ALLOWED; do
+            if [[ "$HEAD_REF" == $prefix* ]]; then
+              valid=true
+              break
+            fi
+          done
+
+          # 允许特殊的合并分支
+          if [[ "$HEAD_REF" == "merge"* ]] || [[ "$HEAD_REF" == "main" ]] || [[ "$HEAD_REF" == "master" ]] || [[ "$HEAD_REF" == "develop" ]]; then
+            valid=true
+          fi
+
+          if [ "$valid" = false ]; then
+            echo "=========================================="
+            echo "  分支命名违规!"
+            echo "  分支: $HEAD_REF"
+            echo "  允许的前缀: claude/, feature/, fix/, hotfix/, chore/, dependabot/, release/"
+            echo "=========================================="
+            echo "建议: 新建一个符合规范的分支并重新提 PR"
+            exit 1
+          fi
+
+          echo "✅ 分支命名合规"
+
+  require-review-done:
+    runs-on: ubuntu-latest
+    needs: check-branch-name
+    steps:
+      - uses: actions/checkout@v4
+        - name: 检查审查标记
+          run: |
+            # 检查最近提交是否有 REVIEW_DONE 标记
+            if git log --format=%B -1 | grep -q "REVIEW_DONE\|Reviewed by"; then
+              echo "✅ 审查标记已确认"
+            else
+              # 警告但不阻止（软检查）
+              echo "⚠️ 最近一次提交没有审查标记"
+              echo "建议运行 /review-deep 进行代码审查后重新推送"
+            fi
