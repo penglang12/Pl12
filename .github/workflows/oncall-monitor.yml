@@ -1,0 +1,65 @@
+name: On-call 监控
+
+on:
+  issues:
+    types: [opened, labeled]
+  schedule:
+    # 工作时间每 2 小时检查一次 (UTC 2:00-14:00 = 北京时间 10:00-22:00)
+    - cron: '0 2,4,6,8,10,12,14 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: '目标仓库 (owner/repo)'
+        required: true
+        default: ''
+
+jobs:
+  triage-critical:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: 获取关键 Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          REPO="${{ inputs.repo || github.repository }}"
+          echo "检查仓库: $REPO"
+
+          # 查找带 bug/critical/security 标签的 OPEN Issue
+          for label in bug critical security priority-high; do
+            gh issue list \
+              --repo "$REPO" \
+              --label "$label" \
+              --state open \
+              --json number,title,createdAt,labels,url \
+              --limit 5 \
+              --jq '.[] | "\(.number) | \(.title) | \(.createdAt)"' \
+              > /tmp/critical-issues-$label.txt 2>/dev/null || true
+
+            if [ -s "/tmp/critical-issues-$label.txt" ]; then
+              echo "=== 标签: $label ==="
+              cat "/tmp/critical-issues-$label.txt"
+            fi
+          done
+      - name: 通知摘要
+        run: |
+          echo "## On-call 检查摘要" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "检查时间: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for f in /tmp/critical-issues-*.txt; do
+            label=$(basename "$f" | sed 's/critical-issues-//;s/\.txt//')
+            if [ -s "$f" ]; then
+              count=$(wc -l < "$f")
+              echo "### ⚠️ $label ($count)" >> $GITHUB_STEP_SUMMARY
+              cat "$f" | while IFS='|' read -r num title date; do
+                echo "- #$num: $title (${date})" >> $GITHUB_STEP_SUMMARY
+              done
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_此检查由 On-call 辅助工作流自动执行_" >> $GITHUB_STEP_SUMMARY
