@@ -1,0 +1,5 @@
+# 不备份密钥文件（已在 model-router.sh 和 settings.json 中内联）
+**/secrets/
+*.key
+*.pem
+.env
